@@ -1,0 +1,11 @@
+﻿D:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(387,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (wk2_fps.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Main.cpp
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(88): warning C4018: '<': signed/unsigned mismatch
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(155): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(239): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(276): warning C4018: '<': signed/unsigned mismatch
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(280): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(281): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(282): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(283): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  wk2_fps.vcxproj -> D:\Repos\3DGraphicsEindopdracht\Debug\3DGraphicsEindopdracht.exe
