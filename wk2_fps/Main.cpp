@@ -8,16 +8,26 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "ModelComponent.h"
+#include "GameObject.h"
+#include "CubeComponent.h"
+#include "PlayerComponent.h"
+#include <math.h>
 
 using namespace std;
+
+#define PI 3.14159265
 
 float lastFrameTime = 0; 
 float deltaTime = 0;
 
 int width, height;
 
-GLuint textureId;
+GLuint terrainTextureId;
 int heightmap[128][128][10];
+
+std::list<GameObject*> objects;
+GameObject* player;
 
 struct Camera
 {
@@ -58,7 +68,7 @@ void drawCube(int index)
 	glEnable(GL_LIGHT1);
 
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, textureId);
+	glBindTexture(GL_TEXTURE_2D, terrainTextureId);
 	glVertexPointer(3, GL_FLOAT, sizeof(Vertex), ((float*)cubes[index].data()) + 0);
 	glNormalPointer(GL_FLOAT, sizeof(Vertex), ((float*)cubes[index].data()) + 3);
 	glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), ((float*)cubes[index].data()) + 10);
@@ -96,37 +106,51 @@ void drawText(string text) {
 
 void display()
 {
-	glClearColor(0.6f, 0.6f, 1, 1);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	//glClearColor(0.6f, 0.6f, 1, 1);
+	//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
+	//gluPerspective(60.0f, (float)width/height, 0.1, 60);
+
+	//glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
+
+	///*glRotatef(camera.rotX, 1, 0, 0);
+	//glRotatef(camera.rotY, 0, 1, 0);
+	//glTranslatef(camera.posX, camera.posZ, camera.posY);*/
+
+	glClearColor(0.9f, 0.5f, 0.5f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60.0f, (float)width/height, 0.1, 60);
+	gluPerspective(90.0f, width / (float)height, 0.1f, 50.0f);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glRotatef(camera.rotX, 1, 0, 0);
-	glRotatef(camera.rotY, 0, 1, 0);
-	glTranslatef(camera.posX, camera.posZ, camera.posY);
 
-	glColor3f(0.1f, 1.0f, 0.2f);
-	glBegin(GL_QUADS);
-		glVertex3f(-30, -1, -30);
-		glVertex3f( 30, -1, -30);
-		glVertex3f( 30, -1,  30);
-		glVertex3f(-30, -1,  30);
-	glEnd();
+	float x, y;
 
-	/*for (int x = -1; x <= 1; x += 5)
-	{
-		for (int y = -1; y <= 1; y += 5)
-		{
-			glPushMatrix();
-			glTranslatef((float)x, 0.0f, (float)y);
-			drawCube(3);
-			glPopMatrix();
-		}
-	}*/
+	x = cos(camera.rotX * PI / 180);
+	y = sin(camera.rotX * PI / 180);
+
+	cout << cos(camera.rotX * PI / 180) << endl;
+
+	gluLookAt(player->position.x, player->position.y, player->position.z,
+		player->position.x, player->position.y - y, player->position.z - x,
+		0, 1, 0);
+
+	for (auto &o : objects)
+		o->draw();
+
+	//glColor3f(0.1f, 1.0f, 0.2f);
+	//glBegin(GL_QUADS);
+	//	glVertex3f(-30, -1, -30);
+	//	glVertex3f( 30, -1, -30);
+	//	glVertex3f( 30, -1,  30);
+	//	glVertex3f(-30, -1,  30);
+	//glEnd();
 
 	for (int x = 0; x < 40; x++) {
 		for (int y = 0; y < 40; y++){
@@ -169,6 +193,11 @@ void idle()
 	if (keys['q']) moveZ(deltaTime*speed);
 	if (keys['e']) moveZ(-deltaTime*speed);
 
+
+
+	for (auto &o : objects)
+		o->update(deltaTime);
+
 	glutPostRedisplay();
 }
 
@@ -181,6 +210,15 @@ void mousePassiveMotion(int x, int y)
 	{
 		camera.rotY += dx / 10.0f;
 		camera.rotX += dy / 10.0f;
+
+		if (camera.rotX > 90)
+			camera.rotX = 90;
+		else if (camera.rotX < -90)
+			camera.rotX = -90;
+
+		if (camera.rotY > 90) {
+			camera.rotY = 0;
+		}
 	}
 	if (!justMovedMouse)
 	{
@@ -226,8 +264,8 @@ int main(int argc, char* argv[])
 
 	glutWarpPointer(width / 2, height / 2);
 
-	glGenTextures(1, &textureId);
-	glBindTexture(GL_TEXTURE_2D, textureId);
+	glGenTextures(1, &terrainTextureId);
+	glBindTexture(GL_TEXTURE_2D, terrainTextureId);
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -282,39 +320,46 @@ int main(int argc, char* argv[])
 		blockWidth = originWidth + 0.0625;
 		blockHeight = originHeight + 0.0625;
 
-		cubeVertices.push_back(Vertex{ -1, -1, -1, 0,0,1, 1,1,1,1 , originWidth, originHeight });
-		cubeVertices.push_back(Vertex{ -1,  1, -1, 0,0,1, 1,1,1,1 , originWidth, blockHeight });
-		cubeVertices.push_back(Vertex{ 1,  1, -1, 0,0,1, 1,1,1,1 , blockWidth, blockHeight });
-		cubeVertices.push_back(Vertex{ 1, -1, -1, 0,0,1, 1,1,1,1 , blockWidth, originHeight });
+		cubeVertices.push_back(Vertex{ -1, -1, -1, 0,1,0, 1,1,1,1 , originWidth, originHeight });
+		cubeVertices.push_back(Vertex{ -1,  1, -1, 0,1,0, 1,1,1,1 , originWidth, blockHeight });
+		cubeVertices.push_back(Vertex{ 1,  1, -1, 0,1,0, 1,1,1,1 , blockWidth, blockHeight });
+		cubeVertices.push_back(Vertex{ 1, -1, -1, 0,1,0, 1,1,1,1 , blockWidth, originHeight });
 
-		cubeVertices.push_back(Vertex{ -1, -1,  1, 0,0,-1, 1,1,1,1 ,  blockWidth, originHeight });
-		cubeVertices.push_back(Vertex{ -1,  1,  1, 0,0,-1, 1,1,1,1 ,  blockWidth,  blockHeight });
-		cubeVertices.push_back(Vertex{ 1,  1,  1, 0,0,-1, 1,1,1,1,	originWidth, blockHeight });
-		cubeVertices.push_back(Vertex{ 1, -1,  1, 0,0,-1, 1,1,1,1, originWidth, originHeight });
+		cubeVertices.push_back(Vertex{ -1, -1,  1, 0,1,0, 1,1,1,1 ,  blockWidth, originHeight });
+		cubeVertices.push_back(Vertex{ -1,  1,  1, 0,1,0, 1,1,1,1 ,  blockWidth,  blockHeight });
+		cubeVertices.push_back(Vertex{ 1,  1,  1, 0,1,0, 1,1,1,1,	originWidth, blockHeight });
+		cubeVertices.push_back(Vertex{ 1, -1,  1, 0,1,0, 1,1,1,1, originWidth, originHeight });
 
-		cubeVertices.push_back(Vertex{ -1,  -1, -1,		0,-1,0,		1,1,1,1, originWidth, originHeight });
-		cubeVertices.push_back(Vertex{ -1,  -1,  1,		0,-1,0,		1,1,1,1, originWidth, blockHeight });
-		cubeVertices.push_back(Vertex{ 1,  -1,  1,		0,-1,0,		1,1,1,1, blockWidth, blockHeight });
-		cubeVertices.push_back(Vertex{ 1,  -1, -1,		0,-1,0,		1,1,1,1, blockWidth, originHeight });
+		cubeVertices.push_back(Vertex{ -1,  -1, -1,		0,1,0,		1,1,1,1, originWidth, originHeight });
+		cubeVertices.push_back(Vertex{ -1,  -1,  1,		0,1,0,		1,1,1,1, originWidth, blockHeight });
+		cubeVertices.push_back(Vertex{ 1,  -1,  1,		0,1,0,		1,1,1,1, blockWidth, blockHeight });
+		cubeVertices.push_back(Vertex{ 1,  -1, -1,		0,1,0,		1,1,1,1, blockWidth, originHeight });
 
 		cubeVertices.push_back(Vertex{ -1,  1, -1,		0,1,0,		1,1,1,1, originWidth, originHeight });
 		cubeVertices.push_back(Vertex{ -1,  1,  1,		0,1,0,		1,1,1,1, originWidth, blockHeight });
 		cubeVertices.push_back(Vertex{ 1,  1,  1,		0,1,0,		1,1,1,1, blockWidth, blockHeight });
 		cubeVertices.push_back(Vertex{ 1,  1, -1,		0,1,0,		1,1,1,1, blockWidth, originHeight });
 
-		cubeVertices.push_back(Vertex{ -1, -1, -1,		-1,0,0,		1,1,1,1, blockWidth, originHeight });
-		cubeVertices.push_back(Vertex{ -1, -1,  1,		-1,0,0,		1,1,1,1, originWidth, originHeight });
-		cubeVertices.push_back(Vertex{ -1,  1,  1,		-1,0,0,		1,1,1,1, originWidth, blockHeight });
-		cubeVertices.push_back(Vertex{ -1,  1, -1,		-1,0,0,		1,1,1,1, blockWidth, blockHeight });
+		cubeVertices.push_back(Vertex{ -1, -1, -1,		0,1,0,		1,1,1,1, blockWidth, originHeight });
+		cubeVertices.push_back(Vertex{ -1, -1,  1,		0,1,0,		1,1,1,1, originWidth, originHeight });
+		cubeVertices.push_back(Vertex{ -1,  1,  1,		0,1,0,		1,1,1,1, originWidth, blockHeight });
+		cubeVertices.push_back(Vertex{ -1,  1, -1,		0,1,0,		1,1,1,1, blockWidth, blockHeight });
 
-		cubeVertices.push_back(Vertex{ 1, -1, -1,		1,0,0,		1,1,1,1, originWidth, originHeight });
-		cubeVertices.push_back(Vertex{ 1, -1,  1,		1,0,0,		1,1,1,1, blockWidth, originHeight });
-		cubeVertices.push_back(Vertex{ 1,  1,  1,		1,0,0,		1,1,1,1, blockWidth, blockHeight });
-		cubeVertices.push_back(Vertex{ 1,  1, -1,		1,0,0,		1,1,1,1, originWidth, blockHeight });
+		cubeVertices.push_back(Vertex{ 1, -1, -1,		0,1,0,		1,1,1,1, originWidth, originHeight });
+		cubeVertices.push_back(Vertex{ 1, -1,  1,		0,1,0,		1,1,1,1, blockWidth, originHeight });
+		cubeVertices.push_back(Vertex{ 1,  1,  1,		0,1,0,		1,1,1,1, blockWidth, blockHeight });
+		cubeVertices.push_back(Vertex{ 1,  1, -1,		0,1,0,		1,1,1,1, originWidth, blockHeight });
 		cubes.push_back(cubeVertices);
 	}
 
 	stbi_image_free(data);
+
+	GameObject* o = new GameObject();
+	o->addComponent(new PlayerComponent());
+	o->position = Vec3f(0, 0, 0);
+	objects.push_back(o);
+
+	player = o;
 
 	glutMainLoop();
 

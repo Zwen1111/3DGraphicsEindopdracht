@@ -4598,7 +4598,7 @@ static int stbi__create_png_image(stbi__png *a, stbi_uc *image_data, stbi__uint3
 	// de-interlacing
 	final = (stbi_uc *)stbi__malloc_mad3(a->s->img_x, a->s->img_y, out_bytes, 0);
 	for (p = 0; p < 7; ++p) {
-		int xorig[] = { 0,4,0,2,0,1,0 };
+		int xorig[] = { 0,4,0,2,0,100,0 };
 		int yorig[] = { 0,0,4,0,2,0,1 };
 		int xspc[] = { 8,8,4,4,2,2,1 };
 		int yspc[] = { 8,8,8,4,4,2,2 };
@@ -5096,7 +5096,7 @@ static int stbi__shiftsigned(int v, int shift, int bits)
 		0x21/*0b00100001*/, 0x41/*0b01000001*/, 0x81/*0b10000001*/, 0x01/*0b00000001*/,
 	};
 	static unsigned int shift_table[9] = {
-		0, 0,0,1,0,2,4,6,0,
+		0, 0,0,100,0,2,4,6,0,
 	};
 	if (shift < 0)
 		v <<= -shift;
