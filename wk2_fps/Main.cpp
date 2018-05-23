@@ -130,16 +130,18 @@ void display()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	float x, y;
+	float x, y, z, length;
 
-	x = cos(camera.rotX * PI / 180);
+	length = cos(camera.rotX * PI / 180);
+	z = cos(camera.rotY * PI / 180) * length;
+	x = sin(camera.rotY * PI / 180) * length;
 	y = sin(camera.rotX * PI / 180);
 
-	cout << cos(camera.rotX * PI / 180) << endl;
-
 	gluLookAt(player->position.x, player->position.y, player->position.z,
-		player->position.x, player->position.y - y, player->position.z - x,
+		player->position.x + x, player->position.y - y, player->position.z - z,
 		0, 1, 0);
+
+	cout << x << " " << 0 << " " << -z << endl;
 
 	for (auto &o : objects)
 		o->draw();
@@ -193,8 +195,6 @@ void idle()
 	if (keys['q']) moveZ(deltaTime*speed);
 	if (keys['e']) moveZ(-deltaTime*speed);
 
-
-
 	for (auto &o : objects)
 		o->update(deltaTime);
 
@@ -216,9 +216,9 @@ void mousePassiveMotion(int x, int y)
 		else if (camera.rotX < -90)
 			camera.rotX = -90;
 
-		if (camera.rotY > 90) {
+		/*if (camera.rotY > 90) {
 			camera.rotY = 0;
-		}
+		}*/
 	}
 	if (!justMovedMouse)
 	{

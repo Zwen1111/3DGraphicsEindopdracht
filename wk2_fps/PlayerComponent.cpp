@@ -23,6 +23,8 @@ void PlayerComponent::update(float elapsedTime)
 		gameObject->position.x -= elapsedTime * speed;
 	if (keys['d'])
 		gameObject->position.x += elapsedTime * speed;
+	if (keys['q'])
+		gameObject->position.y -= elapsedTime * speed;
 	if (keys['e'])
 		gameObject->position.y += elapsedTime * speed;
 
