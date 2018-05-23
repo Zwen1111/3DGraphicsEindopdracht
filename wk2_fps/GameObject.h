@@ -23,7 +23,7 @@ public:
 
 	void addComponent(Component* component);
 	std::list<Component*> getComponents();
-	void update(float elapsedTime);
+	void update(float elapsedTime, float rotX, float rotY);
 	void draw();
 
 	template<class T>

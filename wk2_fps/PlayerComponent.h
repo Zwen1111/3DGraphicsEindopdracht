@@ -9,6 +9,6 @@ public:
 	PlayerComponent();
 	~PlayerComponent();
 
-	virtual void update(float elapsedTime) override;
+	virtual void update(float elapsedTime, float rotX, float rotY) override;
 };
 

@@ -141,7 +141,7 @@ void display()
 		player->position.x + x, player->position.y - y, player->position.z - z,
 		0, 1, 0);
 
-	cout << x << " " << 0 << " " << -z << endl;
+	//cout << x << " " << 0 << " " << -z << endl;
 
 	for (auto &o : objects)
 		o->draw();
@@ -171,32 +171,14 @@ void display()
 	glutSwapBuffers();
 }
 
-void move(float angle, float fac)
-{
-	camera.posX += (float)cos((camera.rotY + angle) / 180 * M_PI) * fac;
-	camera.posY += (float)sin((camera.rotY + angle) / 180 * M_PI) * fac;
-}
-
-void moveZ(float dir) {
-	camera.posZ += (float)dir*0.75;
-}
-
 void idle()
 {
 	float frameTime = glutGet(GLUT_ELAPSED_TIME)/1000.0f;
 	deltaTime = frameTime - lastFrameTime;
 	lastFrameTime = frameTime;
 
-	const float speed = 16;
-	if (keys['a']) move(0, deltaTime*speed);
-	if (keys['d']) move(180, deltaTime*speed);
-	if (keys['w']) move(90, deltaTime*speed);
-	if (keys['s']) move(270, deltaTime*speed);
-	if (keys['q']) moveZ(deltaTime*speed);
-	if (keys['e']) moveZ(-deltaTime*speed);
-
 	for (auto &o : objects)
-		o->update(deltaTime);
+		o->update(deltaTime, camera.rotX, camera.rotY);
 
 	glutPostRedisplay();
 }

@@ -1,13 +1,14 @@
-﻿  Main.cpp
+﻿  PlayerComponent.cpp
+  Main.cpp
 d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(76): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(135): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(136): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(137): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(138): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(181): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(277): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(318): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(319): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(320): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(321): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(259): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(300): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(301): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(302): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+d:\repos\3dgraphicseindopdracht\wk2_fps\main.cpp(303): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  Generating Code...
   wk2_fps.vcxproj -> D:\Repos\3DGraphicsEindopdracht\x64\Debug\3DGraphicsEindopdracht.exe

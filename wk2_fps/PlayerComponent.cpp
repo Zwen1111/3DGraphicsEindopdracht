@@ -1,9 +1,10 @@
 #include "PlayerComponent.h"
 #include "GameObject.h"
+#include <math.h>
 
 extern bool keys[256];
 
-
+using namespace std;
 
 PlayerComponent::PlayerComponent()
 {
@@ -13,7 +14,7 @@ PlayerComponent::~PlayerComponent()
 {
 }
 
-void PlayerComponent::update(float elapsedTime)
+void PlayerComponent::update(float elapsedTime, float rotX, float rotY)
 {
 	if (keys['w'])
 		gameObject->position.z -= elapsedTime * speed;

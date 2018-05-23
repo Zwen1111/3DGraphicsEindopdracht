@@ -41,8 +41,8 @@ void GameObject::draw()
 	glPopMatrix();
 }
 
-void GameObject::update(float elapsedTime)
+void GameObject::update(float elapsedTime, float rotX, float rotY)
 {
 	for (auto &c : components)
-		c->update(elapsedTime);
+		c->update(elapsedTime, rotX, rotY);
 }
