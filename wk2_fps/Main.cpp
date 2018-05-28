@@ -40,14 +40,6 @@ struct Camera
 
 bool keys[255];
 
-struct Vertex
-{
-	float x, y, z;
-	float nx, ny, nz;
-	float r, g, b, a;
-	float tx, ty;
-};
-
 std::vector<vector<Vertex>> cubes;
 
 void drawCube(int index)
@@ -63,9 +55,9 @@ void drawCube(int index)
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
 
-	glEnable(GL_LIGHTING);
+	/*glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHT1);
+	glEnable(GL_LIGHT1);*/
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, terrainTextureId);
@@ -145,25 +137,6 @@ void display()
 
 	for (auto &o : objects)
 		o->draw();
-
-	//glColor3f(0.1f, 1.0f, 0.2f);
-	//glBegin(GL_QUADS);
-	//	glVertex3f(-30, -1, -30);
-	//	glVertex3f( 30, -1, -30);
-	//	glVertex3f( 30, -1,  30);
-	//	glVertex3f(-30, -1,  30);
-	//glEnd();
-
-	for (int x = 0; x < 40; x++) {
-		for (int y = 0; y < 40; y++){
-			for (int z = 0; z < 10; z++) {
-				glPushMatrix();
-				glTranslatef((float)x*2 - 20, (float)z*2, (float)y*2 - 20);
-				drawCube(heightmap[x][y][z]);
-				glPopMatrix();
-			}
-		}
-	}
 
 	glColor3f(1, 0, 0);
 	drawText(std::to_string((int)(1/(double)deltaTime)));
@@ -252,24 +225,7 @@ int main(int argc, char* argv[])
 	stbi_set_flip_vertically_on_load(true);
 
 	int bpp;
-	stbi_uc* data = stbi_load("heightmap.png", &width, &height, &bpp, 1);
-
-	for (int x = 0; x < 128; x++) {
-		for (int y = 0; y < 128; y++) {
-			int heightData = (((float)data[(x * 128) + y]) / 256) * maxHeight;
-			//cout << heightData << endl;
-			for (int z = 0; z < maxHeight; z++) {
-				if (z == heightData) {
-					heightmap[x][y][z] = 0;
-				}
-				else {
-					heightmap[x][y][z] = -1;
-				}
-			}
-		}
-	}
-
-	data = stbi_load("terrain.png", &width, &height, &bpp, 4);
+	stbi_uc* data = stbi_load("terrain.png", &width, &height, &bpp, 4);
 
 	glTexImage2D(GL_TEXTURE_2D,
 		0,
@@ -334,11 +290,30 @@ int main(int argc, char* argv[])
 		cubes.push_back(cubeVertices);
 	}
 
+	data = stbi_load("heightmap.png", &width, &height, &bpp, 1);
+
+	for (int x = 10; x < 50; x++) {
+		for (int y = 10; y < 50; y++) {
+			int heightData = (((float)data[(x * 128) + y]) / 256) * maxHeight;
+			//cout << heightData << endl;
+			for (int z = 0; z < maxHeight; z++) {
+				if (z == heightData) {
+					GameObject* block = new GameObject();
+					block->addComponent(new CubeComponent(2, cubes[0], terrainTextureId));
+					block->position = Vec3f((float)x * 2 - 20, (float)z * 2, (float)y * 2 - 20);
+					objects.push_back(block);
+				}
+				else {
+				}
+			}
+		}
+	}
+
 	stbi_image_free(data);
 
 	GameObject* o = new GameObject();
 	o->addComponent(new PlayerComponent());
-	o->position = Vec3f(0, 0, 0);
+	o->position = Vec3f(0, 10, 0);
 	objects.push_back(o);
 
 	player = o;
