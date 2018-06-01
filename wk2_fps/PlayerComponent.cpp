@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include <math.h>
 #include <iostream>
+#include "ModelComponent.h"
 
 extern bool keys[256];
 
@@ -9,35 +10,118 @@ extern bool keys[256];
 
 using namespace std;
 
-PlayerComponent::PlayerComponent()
+PlayerComponent::PlayerComponent(int mapData[128][128])
 {
+	for (size_t x = 0; x < 128; x++)
+	{
+		for (size_t y = 0; y < 128; y++)
+		{
+			this->mapData[x][y] = mapData[x][y];
+		}
+	}
 }
 
 PlayerComponent::~PlayerComponent()
 {
 }
 
-void PlayerComponent::update(float elapsedTime, float rotX, float rotY)
+void PlayerComponent::update(float elapsedTime, float rotX, float rotY, std::list<GameObject*>& objects)
 {
-	if (keys['w']) {
-		gameObject->position.z -= elapsedTime * speed * cos(rotY * PI / 180);
-		gameObject->position.x += elapsedTime * speed * sin(rotY * PI / 180);
+	std::list<ModelComponent*> models;
+
+	for (auto object : objects)
+	{
+		for (auto component : object->getComponents()) {
+			if (ModelComponent* m = dynamic_cast<ModelComponent*>(component)) {
+				models.push_back(m);
+			}
+		}
 	}
-	if (keys['s']) {
-		gameObject->position.z += elapsedTime * speed * cos(rotY * PI / 180);
-		gameObject->position.x -= elapsedTime * speed * sin(rotY * PI / 180);
+
+	if (keys['w'] || keys['W']) {
+		float tempX = gameObject->position.x + elapsedTime * speed * sin(rotY * PI / 180);
+		float tempZ = gameObject->position.z - elapsedTime * speed * cos(rotY * PI / 180);
+
+		bool collided = false;
+
+		for (auto model : models) {
+			if (model->collision(Vec3f(tempX + 0.5f, (gameObject->position.y - 4.0f), tempZ + 0.5f))) {
+				collided = true;
+				break;
+			}
+		}
+
+		if (mapData[(int(tempX + 1) / 2)][(int(tempZ + 1) / 2)] < (int)(gameObject->position.y - 4.0f) && !collided) {
+			gameObject->position.z -= elapsedTime * speed * cos(rotY * PI / 180);
+			gameObject->position.x += elapsedTime * speed * sin(rotY * PI / 180);
+		}
 	}
-	if (keys['a']) {
-		gameObject->position.z -= elapsedTime * speed * cos((rotY - 90) * PI / 180);
-		gameObject->position.x += elapsedTime * speed * sin((rotY - 90) * PI / 180);
+	if (keys['s'] || keys['S']) {
+		float tempX = gameObject->position.x + elapsedTime * speed * sin(rotY * PI / 180);
+		float tempZ = gameObject->position.z - elapsedTime * speed * cos(rotY * PI / 180);
+
+		bool collided = false;
+
+		for (auto model : models) {
+			if (model->collision(Vec3f(tempX - 1.5f, (gameObject->position.y - 4.0f), tempZ - 1.5f))) {
+				collided = true;
+				break;
+			}
+		}
+
+		if (mapData[(int(tempX) / 2)][(int(tempZ) / 2)] < (int)(gameObject->position.y - 4.0f) && !collided) {
+			gameObject->position.z += elapsedTime * speed * cos(rotY * PI / 180);
+			gameObject->position.x -= elapsedTime * speed * sin(rotY * PI / 180);
+		}
 	}
-	if (keys['d']) {
-		gameObject->position.z -= elapsedTime * speed * cos((rotY+90) * PI / 180);
-		gameObject->position.x += elapsedTime * speed * sin((rotY+90) * PI / 180);
+	if (keys['a'] || keys['A']) {
+		float tempX = gameObject->position.x + elapsedTime * speed * sin((rotY - 90) * PI / 180);
+		float tempZ = gameObject->position.z - elapsedTime * speed * cos((rotY - 90) * PI / 180);
+
+		bool collided = false;
+
+		for (auto model : models) {
+			if (model->collision(Vec3f(tempX + 0.5f, (gameObject->position.y), tempZ + 0.5f))) {
+				collided = true;
+				break;
+			}
+		}
+
+		if (mapData[(int(tempX + 1) / 2)][(int(tempZ + 1) / 2)] < (int)(gameObject->position.y - 4.0f) && !collided) {
+			gameObject->position.z -= elapsedTime * speed * cos((rotY - 90) * PI / 180);
+			gameObject->position.x += elapsedTime * speed * sin((rotY - 90) * PI / 180);
+		}
 	}
-	if (keys['q'])
-		gameObject->position.y -= elapsedTime * speed;
+	if (keys['d'] || keys['D']) {
+		float tempX = gameObject->position.x + elapsedTime * speed * sin((rotY + 90) * PI / 180);
+		float tempZ = gameObject->position.z - elapsedTime * speed * cos((rotY + 90) * PI / 180);
+
+		bool collided = false;
+
+		for (auto model : models) {
+			if (model->collision(Vec3f(tempX + 0.5f, (gameObject->position.y), tempZ + 0.5f))) {
+				collided = true;
+				break;
+			}
+		}
+
+		if (mapData[(int(tempX + 1) / 2)][(int(tempZ + 1) / 2)] < (int)(gameObject->position.y - 4.0f) && !collided) {
+			gameObject->position.z -= elapsedTime * speed * cos((rotY + 90) * PI / 180);
+			gameObject->position.x += elapsedTime * speed * sin((rotY + 90) * PI / 180);
+		}
+	}
+	if (keys['q']) {
+		float tempY = gameObject->position.y - elapsedTime * speed;
+		if(mapData[(int(gameObject->position.x + 1) / 2)][(int(gameObject->position.z + 1) / 2)] < tempY - 5.0f)
+			gameObject->position.y -= elapsedTime * speed;
+	}
+	if (keys[32]) {
+		jump();
+	}
 	if (keys['e'])
 		gameObject->position.y += elapsedTime * speed;
-
+	if (jumping) {
+		gameObject->position.y += (jumpValue / gameObject->position.y);
+		jumpValue = jumpValue / gameObject->position.y;
+	}
 }

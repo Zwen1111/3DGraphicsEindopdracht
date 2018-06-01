@@ -1,6 +1,7 @@
 #include "GameObject.h"
 #include "DrawComponent.h"
 #include <GL/freeglut.h>
+#include <list>
 
 GameObject::GameObject()
 {
@@ -41,8 +42,8 @@ void GameObject::draw()
 	glPopMatrix();
 }
 
-void GameObject::update(float elapsedTime, float rotX, float rotY)
+void GameObject::update(float elapsedTime, float rotX, float rotY, std::list<GameObject*>& objects)
 {
 	for (auto &c : components)
-		c->update(elapsedTime, rotX, rotY);
+		c->update(elapsedTime, rotX, rotY, objects);
 }

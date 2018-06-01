@@ -3,17 +3,16 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 #include <iostream>
 #include <vector>
 #include <string>
-#include "ModelComponent.h"
 #include "GameObject.h"
 #include "CubeComponent.h"
 #include "PlayerComponent.h"
 #include <math.h>
 #include <Windows.h>
 #include <Mmsystem.h>
+#include "ModelComponent.h"
 
 using namespace std;
 
@@ -23,6 +22,8 @@ float lastFrameTime = 0;
 float deltaTime = 0;
 
 int width, height;
+const int maxHeight = 10;
+int mapData[128][128];
 
 bool showMenu = true;
 
@@ -31,6 +32,11 @@ int heightmap[128][128][10];
 
 std::list<GameObject*> objects;
 GameObject* player;
+GameObject* car;
+
+std::vector<vector<Vertex>> cubes;
+
+int imageWidth, imageHeight;
 
 struct Camera
 {
@@ -46,17 +52,17 @@ bool keys[255];
 /*
 Drawing text 2D screen.
 */
-void drawText(string text) {
+void drawText(string text, int x, int y) {
 	glMatrixMode(GL_PROJECTION); // change the current matrix to PROJECTION
 	double matrix[16]; // 16 doubles in stack memory
 	glGetDoublev(GL_PROJECTION_MATRIX, matrix); // get the values from PROJECTION matrix to local variable
 	glLoadIdentity(); // reset PROJECTION matrix to identity matrix
-	glOrtho(0, 800, 0, 600, -5, 5); // orthographic perspective
+	glOrtho(0, width, 0, height, -5, 5); // orthographic perspective
 	glMatrixMode(GL_MODELVIEW); // change current matrix to MODELVIEW matrix again
 	glLoadIdentity(); // reset it to identity matrix
 	glPushMatrix(); // push current state of MODELVIEW matrix to stack
 	glLoadIdentity(); // reset it again. (may not be required, but it my convention)
-	glRasterPos2i(0, height - 20); // raster position in 2D
+	glRasterPos2i(x, height - y); // raster position in 2D
 	for (int i = 0; i<text.length(); i++) {
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, (int)text[i]); // generation of characters in our text with 9 by 15 GLU font
 	}
@@ -64,39 +70,6 @@ void drawText(string text) {
 	glMatrixMode(GL_PROJECTION); // change current matrix mode to PROJECTION
 	glLoadMatrixd(matrix); // reset
 	glMatrixMode(GL_MODELVIEW); // change current matrix mode to MODELVIEW
-}
-
-std::vector<vector<Vertex>> cubes;
-
-void drawCube(int index)
-{
-	if (index == -1)
-		return;
-
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-	glEnableClientState(GL_COLOR_ARRAY);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
-
-	/*glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHT1);*/
-
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, textures[0]);
-	glVertexPointer(3, GL_FLOAT, sizeof(Vertex), ((float*)cubes[index].data()) + 0);
-	glNormalPointer(GL_FLOAT, sizeof(Vertex), ((float*)cubes[index].data()) + 3);
-	glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), ((float*)cubes[index].data()) + 10);
-	glColorPointer(4, GL_FLOAT, sizeof(Vertex), ((float*)cubes[index].data()) + 6);
-	glDrawArrays(GL_QUADS, 0, cubes[index].size());
-
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
 }
 
 void drawMenu() {
@@ -175,7 +148,33 @@ void display()
 	}
 
 	glColor3f(1, 0, 0);
-	drawText(std::to_string((int)(1/(double)deltaTime)));
+	drawText(to_string((int)(1/(double)deltaTime)), 0, 20);
+
+	glColor3f(1, 1, 1);
+	drawText(to_string(player->position.x), 0, 40);
+	drawText(to_string(player->position.y), 0, 60);
+	drawText(to_string(player->position.z), 0, 80);
+
+	std::list<ModelComponent*> models;
+
+	for (auto object : objects)
+	{
+		for (auto component : object->getComponents()) {
+			if (ModelComponent* m = dynamic_cast<ModelComponent*>(component)) {
+				models.push_back(m);
+			}
+		}
+	}
+
+	/*drawText(to_string(models.front()->lowestX * 0.1f + 20), 0, 120);
+	drawText(to_string(models.front()->lowestY * 0.1f + 10), 0, 140);
+	drawText(to_string(models.front()->lowestZ * 0.1f + 20), 0, 160);
+
+	drawText(to_string(models.front()->highestX * 0.1f + 20), 0, 200);
+	drawText(to_string(models.front()->highestY * 0.1f + 10), 0, 220);
+	drawText(to_string(models.front()->lowestZ * 0.1f + 20), 0, 240);*/
+
+	//player->position = Vec3f(player->position.x, mapData[(int(player->position.x + 1) / 2)][(int(player->position.z + 1) / 2)] + 4, player->position.z);
 
 	glutSwapBuffers();
 }
@@ -186,8 +185,21 @@ void idle()
 	deltaTime = frameTime - lastFrameTime;
 	lastFrameTime = frameTime;
 
+	Vec3f oldPos = car->position;
+	car->position.x += 1;
+	car->position.z *= 1.1f;
+	Vec3f newPos = car->position;
+
+	float angle = (atan2(newPos.x - oldPos.x, newPos.z - oldPos.z) * 180) / PI + 90;
+	car->rotation.y = angle;
+
+	if (newPos.x > imageWidth * 2 || newPos.z == 0) {
+		car->position.x = 0;
+		car->position.z = 1;
+	}
+
 	for (auto &o : objects)
-		o->update(deltaTime, camera.rotX, camera.rotY);
+		o->update(deltaTime, camera.rotX, camera.rotY, objects);
 
 	glutPostRedisplay();
 }
@@ -203,10 +215,10 @@ void mousePassiveMotion(int x, int y)
 			camera.rotY += dx / 10.0f;
 			camera.rotX += dy / 10.0f;
 
-			if (camera.rotX > 90)
-				camera.rotX = 90;
-			else if (camera.rotX < -90)
-				camera.rotX = -90;
+			if (camera.rotX > 89)
+				camera.rotX = 89;
+			else if (camera.rotX < -89)
+				camera.rotX = -89;
 		}
 		if (!justMovedMouse)
 		{
@@ -231,8 +243,6 @@ void keyboardUp(unsigned char key, int,int)
 
 int main(int argc, char* argv[])
 {
-	int maxHeight = 10;
-
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(800, 600);
 	glutInit(&argc, argv);
@@ -347,18 +357,25 @@ int main(int argc, char* argv[])
 		cubes.push_back(cubeVertices);
 	}
 
-	data = stbi_load("heightmap.png", &width, &height, &bpp, 1);
+	data = stbi_load("heightmap3.png", &imageWidth, &imageHeight, &bpp, 1);
 
-	for (int x = 10; x < 50; x++) {
-		for (int y = 10; y < 50; y++) {
-			int heightData = (((float)data[(x * 128) + y]) / 256) * maxHeight;
+	for (int x = 0; x < imageWidth; x++) {
+		for (int y = 0; y < imageHeight; y++) {
+			int heightData = (((float)data[(x * imageWidth) + y]) / 255) * maxHeight;
 			//cout << heightData << endl;
 			for (int z = 0; z < maxHeight; z++) {
 				if (z == heightData) {
 					GameObject* block = new GameObject();
 					block->addComponent(new CubeComponent(2, cubes[0], textures[0]));
-					block->position = Vec3f((float)x * 2 - 20, (float)z * 2, (float)y * 2 - 20);
+					block->position = Vec3f((float)x * 2, (float)z * 2, (float)y * 2);
 					objects.push_back(block);
+
+					int xx = (int(((float)x * 2) + 1) / 2);
+					int yy = (float)z * 2;
+					int zz = (int(((float)y * 2) + 1) / 2);
+
+
+					mapData[xx][zz] = yy;
 				}
 				else {
 				}
@@ -369,13 +386,19 @@ int main(int argc, char* argv[])
 	stbi_image_free(data);
 
 	GameObject* o = new GameObject();
-	o->addComponent(new PlayerComponent());
-	o->position = Vec3f(0, 10, 0);
+	o->addComponent(new PlayerComponent(mapData));
+	o->position = Vec3f(30, 0, 30);
 	objects.push_back(o);
 
 	player = o;
 
-	glutFullScreen();
+	car = new GameObject();
+	car->addComponent(new ModelComponent("models/car/honda_jazz.obj"));
+	car->position = Vec3f(20, 0, 20);
+	car->scale = Vec3f(0.1f, 0.1f, 0.1f);
+	objects.push_back(car);
+
+	//glutFullScreen();
 	PlaySound("menu_music.wav", NULL, SND_LOOP | SND_ASYNC);
 
 	glutMainLoop();
