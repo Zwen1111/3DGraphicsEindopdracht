@@ -97,6 +97,7 @@ void drawMenu() {
 }
 
 int menuItem = 1;
+GLfloat qaLightPosition[] = { 0, 6, 0, 1 };
 
 void display()
 {
@@ -104,6 +105,7 @@ void display()
 
 	glClearColor(0.9f, 0.5f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glLightfv(GL_LIGHT0, GL_POSITION, qaLightPosition);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -122,6 +124,10 @@ void display()
 	gluLookAt(player->position.x, player->position.y, player->position.z,
 		player->position.x + x, player->position.y - y, player->position.z - z,
 		0, 1, 0);
+
+	glPushMatrix();
+	glTranslatef(qaLightPosition[0], qaLightPosition[1], qaLightPosition[2]);
+	glPopMatrix();
 
 	if (showMenu) {
 		glBindTexture(GL_TEXTURE_2D, textures[menuItem]);
@@ -259,7 +265,27 @@ int main(int argc, char* argv[])
 	glutPassiveMotionFunc(mousePassiveMotion);
 
 	glutWarpPointer(width / 2, height / 2);
-	
+
+	glShadeModel(GL_SMOOTH);
+
+	GLfloat qaAmbientLight[] = { 0,0,0,1 };
+	GLfloat qaDiffuseLight[] = { 1,1,1,1 };
+	GLfloat qaSpecularLight[] = { 1,1,1,1 };
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_COLOR_MATERIAL);
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, qaAmbientLight);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, qaDiffuseLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, qaSpecularLight);
+
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glPushMatrix();
+	glLightfv(GL_LIGHT0, GL_POSITION, qaLightPosition);
+	glPopMatrix();
+
+
 	glGenTextures(3, textures);
 	glBindTexture(GL_TEXTURE_2D, textures[0]);
 
