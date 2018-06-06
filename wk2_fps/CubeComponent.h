@@ -25,5 +25,6 @@ public:
 	~CubeComponent();
 
 	virtual void draw() override;
+	void drawOutline();
 };
 

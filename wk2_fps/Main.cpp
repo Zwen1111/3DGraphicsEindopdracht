@@ -438,7 +438,7 @@ int main(int argc, char* argv[])
 	car->addComponent(new ModelComponent("models/car/honda_jazz.obj"));
 	car->position = Vec3f(20, 4, 20);
 	car->scale = Vec3f(0.1f, 0.1f, 0.1f);
-	//objects.push_back(car);
+	objects.push_back(car);
 
 	glutFullScreen();
 	PlaySound("menu_music.wav", NULL, SND_LOOP | SND_ASYNC);

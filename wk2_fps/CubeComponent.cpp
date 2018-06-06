@@ -41,3 +41,13 @@ void CubeComponent::draw()
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY_EXT);
 }
+
+void CubeComponent::drawOutline() {
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glColor3f(255, 255, 255);
+	glVertexPointer(3, GL_FLOAT, sizeof(Vertex), ((float*)vertex.data()) + 0);
+	glDrawArrays(GL_QUADS, 0, vertex.size());
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
