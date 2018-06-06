@@ -261,9 +261,9 @@ void ModelComponent::draw()
 			glBegin(GL_TRIANGLES);
 			for (auto& vertex : face.vertices) {
 				Vector3D vectexture = texcoords[vertex.texcoord];
-				if (normals.size() > vertex.normal) {
+				/*if (normals.size() > vertex.normal) {
 					Vector3D vecNorm = normals[vertex.normal];
-				}
+				}*/
 				glTexCoord2f(vectexture.x, vectexture.y);
 
 				glVertex3f(vertices[vertex.position].x, vertices[vertex.position].y, vertices[vertex.position].z);

@@ -109,7 +109,7 @@ void display()
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(90.0f, width / (float)height, 0.1f, 50.0f);
+	gluPerspective(90.0f, width / (float)height, 0.1f, 45.0f);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -147,8 +147,10 @@ void display()
 	}
 	else {
 		glBindTexture(GL_TEXTURE_2D, textures[0]);
-		for (auto &o : objects)
-			o->draw();
+		for (auto &o : objects) {
+			if(o->position.x > player->position.x - 80.f && o->position.x < player->position.x + 80.f && o->position.z > player->position.z - 80.f && o->position.z < player->position.z + 80.f)
+				o->draw();
+		}
 		if (keys[27])
 			showMenu = true;
 	}
@@ -161,7 +163,7 @@ void display()
 	drawText(to_string(player->position.y), 0, 60);
 	drawText(to_string(player->position.z), 0, 80);
 
-	std::list<ModelComponent*> models;
+	/*std::list<ModelComponent*> models;
 
 	for (auto object : objects)
 	{
@@ -172,7 +174,7 @@ void display()
 		}
 	}
 
-	/*drawText(to_string(models.front()->lowestX * 0.1f + 20), 0, 120);
+	drawText(to_string(models.front()->lowestX * 0.1f + 20), 0, 120);
 	drawText(to_string(models.front()->lowestY * 0.1f + 10), 0, 140);
 	drawText(to_string(models.front()->lowestZ * 0.1f + 20), 0, 160);
 
@@ -185,13 +187,15 @@ void display()
 	glutSwapBuffers();
 }
 
+float rotation = 0;
+
 void idle()
 {
 	float frameTime = glutGet(GLUT_ELAPSED_TIME)/1000.0f;
 	deltaTime = frameTime - lastFrameTime;
 	lastFrameTime = frameTime;
 
-	Vec3f oldPos = car->position;
+	/*Vec3f oldPos = car->position;
 	car->position.x += 1;
 	car->position.z *= 1.1f;
 	Vec3f newPos = car->position;
@@ -202,10 +206,22 @@ void idle()
 	if (newPos.x > imageWidth * 2 || newPos.z == 0) {
 		car->position.x = 0;
 		car->position.z = 1;
-	}
+	}*/
 
-	for (auto &o : objects)
-		o->update(deltaTime, camera.rotX, camera.rotY, objects);
+	rotation+=0.1f;
+
+	Vec3f oldPos = car->position;
+	car->position.x = cos(rotation) * 28 + 32;
+	car->position.z = sin(rotation) * 28 + 32;
+	Vec3f newPos = car->position;
+
+	float angle = (atan2(newPos.x - oldPos.x, newPos.z - oldPos.z) * 180) / PI + 90;
+	car->rotation.y = angle;
+
+	for (auto &o : objects) {
+		if (o->position.x > player->position.x - 80.f && o->position.x < player->position.x + 80.f && o->position.z > player->position.z - 80.f && o->position.z < player->position.z + 80.f)
+			o->update(deltaTime, camera.rotX, camera.rotY, objects);
+	}
 
 	glutPostRedisplay();
 }
@@ -383,7 +399,7 @@ int main(int argc, char* argv[])
 		cubes.push_back(cubeVertices);
 	}
 
-	data = stbi_load("heightmap3.png", &imageWidth, &imageHeight, &bpp, 1);
+	data = stbi_load("heightmap2.png", &imageWidth, &imageHeight, &bpp, 1);
 
 	for (int x = 0; x < imageWidth; x++) {
 		for (int y = 0; y < imageHeight; y++) {
@@ -413,18 +429,18 @@ int main(int argc, char* argv[])
 
 	GameObject* o = new GameObject();
 	o->addComponent(new PlayerComponent(mapData));
-	o->position = Vec3f(30, 0, 30);
+	o->position = Vec3f(30, 8, 30);
 	objects.push_back(o);
 
 	player = o;
 
 	car = new GameObject();
 	car->addComponent(new ModelComponent("models/car/honda_jazz.obj"));
-	car->position = Vec3f(20, 0, 20);
+	car->position = Vec3f(20, 4, 20);
 	car->scale = Vec3f(0.1f, 0.1f, 0.1f);
-	objects.push_back(car);
+	//objects.push_back(car);
 
-	//glutFullScreen();
+	glutFullScreen();
 	PlaySound("menu_music.wav", NULL, SND_LOOP | SND_ASYNC);
 
 	glutMainLoop();

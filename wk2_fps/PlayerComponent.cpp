@@ -69,7 +69,9 @@ void PlayerComponent::update(float elapsedTime, float rotX, float rotY, std::lis
 			}
 		}
 
-		if (mapData[(int(tempX) / 2)][(int(tempZ) / 2)] < (int)(gameObject->position.y - 4.0f) && !collided) {
+		cout << "X: " << floor((tempX + 1) / 2) << " Y: " << floor((tempZ + 1) / 2) << " Height: " << mapData[(int(tempX + 1) / 2)][(int(tempZ + 1) / 2)] << endl;
+
+		if (mapData[(int)floor((tempX + 1) / 2)][(int)floor((tempZ + 1) / 2)] < (int)(gameObject->position.y - 4.0f) && !collided) {
 			gameObject->position.z += elapsedTime * speed * cos(rotY * PI / 180);
 			gameObject->position.x -= elapsedTime * speed * sin(rotY * PI / 180);
 		}
