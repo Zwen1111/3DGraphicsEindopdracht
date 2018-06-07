@@ -73,6 +73,8 @@ void drawText(string text, int x, int y) {
 }
 
 void drawMenu() {
+	glDisable(GL_LIGHTING);
+
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
@@ -94,6 +96,8 @@ void drawMenu() {
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+
+	glEnable(GL_LIGHTING);
 }
 
 int menuItem = 1;
