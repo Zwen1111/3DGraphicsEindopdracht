@@ -3,6 +3,7 @@
 #include <math.h>
 #include <iostream>
 #include "ModelComponent.h"
+#include "CubeComponent.h"
 
 extern bool keys[256];
 
@@ -124,4 +125,29 @@ void PlayerComponent::update(float elapsedTime, float rotX, float rotY, std::lis
 		gameObject->position.y += (jumpValue / gameObject->position.y);
 		jumpValue = jumpValue / gameObject->position.y;
 	}
+
+	//float x, y, z, length;
+
+	//for (size_t i = 1; i < 10; i++)
+	//{
+	//	length = i * 2;
+	//	z = sin((rotY - 90) * PI / 180) * length;
+	//	x = cos((rotY - 90) * PI / 180) * length;
+	//	y = tan((90-rotX) * PI / 180) * length;
+
+	//	cout << " (" << x << "," << y << "," << z << ")" << endl;
+
+	//	for (auto object : objects) {
+	//		if (object->position.x > (int(gameObject->position.x + 1) / 2) + x && object->position.x < (int(gameObject->position.x + 1) / 2) + x + 2 && object->position.z >(int(gameObject->position.z + 1) / 2) + z && object->position.z < (int(gameObject->position.z + 1) / 2) + z + 2) {
+	//			for (auto component : object->getComponents()) {
+	//				if (CubeComponent* m = dynamic_cast<CubeComponent*>(component)) {
+
+	//					m->drawOutline();
+	//					//cout << "X: " << object->position.x << " Z: " << object->position.z << endl;
+	//					//return;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 }

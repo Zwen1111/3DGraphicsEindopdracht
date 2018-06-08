@@ -57,11 +57,15 @@ private:
 
 	void loadMaterialFile(const std::string &fileName, const std::string &dirName);
 public:
-	ModelComponent(const std::string &filename);
+	ModelComponent(const std::string &filename, GameObject* player);
 	~ModelComponent(void);
 
+	bool collision();
 	bool collision(Vec3f otherPosition);
 	virtual void draw() override;
 
 	float lowestX, highestX, lowestY, highestY, lowestZ, highestZ;
+	float beginX, beginY, beginZ;
+	bool collided = false;
+	GameObject* player;
 };

@@ -2,6 +2,7 @@
 #include "DrawComponent.h"
 #include <GL/freeglut.h>
 #include <list>
+#include "ModelComponent.h"
 
 GameObject::GameObject()
 {
@@ -19,6 +20,12 @@ void GameObject::addComponent(Component * component)
 
 	if (!drawComponent)
 		drawComponent = dynamic_cast<DrawComponent*>(component);
+
+	if (ModelComponent* m = dynamic_cast<ModelComponent*>(component)) {
+		m->beginX = position.x;
+		m->beginY = position.y;
+		m->beginZ = position.z;
+	}
 }
 
 std::list<Component*> GameObject::getComponents()

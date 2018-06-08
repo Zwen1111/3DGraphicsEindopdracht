@@ -105,7 +105,7 @@ GLfloat qaLightPosition[] = { 0, 6, 0, 1 };
 
 void display()
 {
-	ShowCursor(false);
+	//ShowCursor(false);
 
 	glClearColor(0.9f, 0.5f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -163,9 +163,9 @@ void display()
 	drawText(to_string((int)(1/(double)deltaTime)), 0, 20);
 
 	glColor3f(1, 1, 1);
-	drawText(to_string(player->position.x), 0, 40);
+	drawText(to_string(int(player->position.x + 1) / 2), 0, 40);
 	drawText(to_string(player->position.y), 0, 60);
-	drawText(to_string(player->position.z), 0, 80);
+	drawText(to_string(int(player->position.z + 1) / 2), 0, 80);
 
 	/*std::list<ModelComponent*> models;
 
@@ -212,15 +212,22 @@ void idle()
 		car->position.z = 1;
 	}*/
 
-	rotation+=0.1f;
+	for (auto component : car->getComponents()) {
+		if (ModelComponent* m = dynamic_cast<ModelComponent*>(component)) {
+			if (!m->collision()) {
+				rotation += 0.001f;
 
-	Vec3f oldPos = car->position;
-	car->position.x = cos(rotation) * 28 + 32;
-	car->position.z = sin(rotation) * 28 + 32;
-	Vec3f newPos = car->position;
+				Vec3f oldPos = car->position;
+				car->position.x = cos(rotation) * 28 + 32;
+				car->position.z = sin(rotation) * 28 + 32;
+				Vec3f newPos = car->position;
 
-	float angle = (atan2(newPos.x - oldPos.x, newPos.z - oldPos.z) * 180) / PI + 90;
-	car->rotation.y = angle;
+				float angle = (atan2(newPos.x - oldPos.x, newPos.z - oldPos.z) * 180) / PI + 90;
+				car->rotation.y = angle;
+			}
+		}
+	}
+	
 
 	for (auto &o : objects) {
 		if (o->position.x > player->position.x - 80.f && o->position.x < player->position.x + 80.f && o->position.z > player->position.z - 80.f && o->position.z < player->position.z + 80.f)
@@ -433,18 +440,18 @@ int main(int argc, char* argv[])
 
 	GameObject* o = new GameObject();
 	o->addComponent(new PlayerComponent(mapData));
-	o->position = Vec3f(30, 8, 30);
+	o->position = Vec3f(0, 8, 0);
 	objects.push_back(o);
 
 	player = o;
 
 	car = new GameObject();
-	car->addComponent(new ModelComponent("models/car/honda_jazz.obj"));
 	car->position = Vec3f(20, 4, 20);
+	car->addComponent(new ModelComponent("models/car/honda_jazz.obj", o));
 	car->scale = Vec3f(0.1f, 0.1f, 0.1f);
 	objects.push_back(car);
 
-	glutFullScreen();
+	//glutFullScreen();
 	PlaySound("menu_music.wav", NULL, SND_LOOP | SND_ASYNC);
 
 	glutMainLoop();

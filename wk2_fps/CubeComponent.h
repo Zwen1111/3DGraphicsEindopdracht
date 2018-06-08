@@ -17,6 +17,7 @@ struct Vertex
 class CubeComponent : public DrawComponent
 {
 	float size;
+	bool DrawOutline = false;
 	vector<Vertex> vertex;
 	GLuint terrainTextureId;
 

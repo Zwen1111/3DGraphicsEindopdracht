@@ -3,7 +3,11 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include "GameObject.h"
 GLuint textureId;
+
+using namespace std;
+
 /**
 * Replaces a substring in a string
 */
@@ -119,8 +123,10 @@ void Texture::bindTexture() {
 /**
 * Loads an object model
 */
-ModelComponent::ModelComponent(const std::string &fileName)
+ModelComponent::ModelComponent(const std::string &fileName, GameObject* player)
 {
+	this->player = player;
+
 	std::cout << "Loading " << fileName << std::endl;
 	std::string dirName = fileName;
 	if (dirName.rfind("/") != std::string::npos)
@@ -215,10 +221,6 @@ ModelComponent::ModelComponent(const std::string &fileName)
 	}
 	groups.push_back(currentGroup);
 
-	float x = 20;
-	float y = 10;
-	float z = 20;
-
 	auto firstVertex = groups[0]->faces.front().vertices.front();
 	lowestX = vertices[firstVertex.position].x - fmod((vertices[firstVertex.position].x), 0.25);
 	highestX = lowestX;
@@ -231,17 +233,17 @@ ModelComponent::ModelComponent(const std::string &fileName)
 		for (auto& face : group->faces) {
 			for (auto& vertex : face.vertices) {
 				if (vertices[vertex.position].x - fmod((vertices[vertex.position].x), 0.25) < lowestX)
-					lowestX =	vertices[vertex.position].x - fmod((vertices[vertex.position].x),0.25);
+					lowestX = vertices[vertex.position].x - fmod((vertices[vertex.position].x), 0.25);
 				if (vertices[vertex.position].x - fmod((vertices[vertex.position].x), 0.25) > highestX)
-					highestX =	vertices[vertex.position].x - fmod((vertices[vertex.position].x), 0.25);
+					highestX = vertices[vertex.position].x - fmod((vertices[vertex.position].x), 0.25);
 				if (vertices[vertex.position].y - fmod((vertices[vertex.position].y), 0.25) < lowestY)
-					lowestY =	vertices[vertex.position].y - fmod((vertices[vertex.position].y), 0.25);
+					lowestY = vertices[vertex.position].y - fmod((vertices[vertex.position].y), 0.25);
 				if (vertices[vertex.position].y - fmod((vertices[vertex.position].y), 0.25) > highestY)
-					highestY =	vertices[vertex.position].y - fmod((vertices[vertex.position].y), 0.25);
+					highestY = vertices[vertex.position].y - fmod((vertices[vertex.position].y), 0.25);
 				if (vertices[vertex.position].z - fmod((vertices[vertex.position].z), 0.25) < lowestZ)
-					lowestZ =	vertices[vertex.position].z - fmod((vertices[vertex.position].z), 0.25);
+					lowestZ = vertices[vertex.position].z - fmod((vertices[vertex.position].z), 0.25);
 				if (vertices[vertex.position].z - fmod((vertices[vertex.position].z), 0.25) > highestZ)
-					highestZ =	vertices[vertex.position].z - fmod((vertices[vertex.position].z), 0.25);
+					highestZ = vertices[vertex.position].z - fmod((vertices[vertex.position].z), 0.25);
 			}
 		}
 	}
@@ -299,11 +301,22 @@ void ModelComponent::draw()
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-bool ModelComponent::collision(Vec3f otherPosition) {
-	if ((otherPosition.x >= lowestX * 0.1f + 20) && (otherPosition.x <= highestX * 0.1f + 20) && (otherPosition.y >= lowestY * 0.1f + 10) && (otherPosition.y <= highestY * 0.1f + 10) && (otherPosition.z >= lowestZ * 0.1f + 20) && (otherPosition.z <= highestZ * 0.1f + 20))
-		return true;
+bool ModelComponent::collision() {
+	if ((player->position.x >= (lowestX - beginX) * 0.1f + gameObject->position.x) && (player->position.x <= (highestX - beginX) * 0.1f + gameObject->position.x) && (player->position.y + 4.f >= (lowestY - beginY) * 0.1f + gameObject->position.y) && (player->position.y <= (highestY - beginY) * 0.1f + gameObject->position.y) && (player->position.z >= (lowestZ - beginZ) * 0.1f + gameObject->position.z) && (player->position.z <= (highestZ - beginZ) * 0.1f + gameObject->position.z))
+		collided = true;
 	else
-		return false;
+		collided = false;
+
+	return collided;
+}
+
+bool ModelComponent::collision(Vec3f otherPosition) {
+	if ((otherPosition.x >= (lowestX - beginX) * 0.1f + gameObject->position.x) && (otherPosition.x <= (highestX - beginX) * 0.1f + gameObject->position.x) && (otherPosition.y + 4.f >= (lowestY - beginY) * 0.1f + gameObject->position.y) && (otherPosition.y <= (highestY - beginY) * 0.1f + gameObject->position.y) && (otherPosition.z >= (lowestZ - beginZ) * 0.1f + gameObject->position.z) && (otherPosition.z <= (highestZ - beginZ) * 0.1f + gameObject->position.z))
+		collided = true;
+	else
+		collided = false;
+
+	return collided;
 }
 
 void ModelComponent::loadMaterialFile(const std::string &fileName, const std::string &dirName)
