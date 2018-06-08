@@ -414,25 +414,18 @@ int main(int argc, char* argv[])
 
 	for (int x = 0; x < imageWidth; x++) {
 		for (int y = 0; y < imageHeight; y++) {
-			int heightData = (((float)data[(x * imageWidth) + y]) / 255) * maxHeight;
-			//cout << heightData << endl;
-			for (int z = 0; z < maxHeight; z++) {
-				if (z == heightData) {
-					GameObject* block = new GameObject();
-					block->addComponent(new CubeComponent(2, cubes[0], textures[0]));
-					block->position = Vec3f((float)x * 2, (float)z * 2, (float)y * 2);
-					objects.push_back(block);
+			int z = (((float)data[(x * imageWidth) + y]) / 255) * maxHeight;
+			GameObject* block = new GameObject();
+			block->addComponent(new CubeComponent(2, cubes[0], textures[0]));
+			block->position = Vec3f((float)x * 2, (float)z * 2, (float)y * 2);
+			objects.push_back(block);
 
-					int xx = (int(((float)x * 2) + 1) / 2);
-					int yy = (float)z * 2;
-					int zz = (int(((float)y * 2) + 1) / 2);
+			int xx = (int(((float)x * 2) + 1) / 2);
+			int yy = (float)z * 2;
+			int zz = (int(((float)y * 2) + 1) / 2);
 
 
-					mapData[xx][zz] = yy;
-				}
-				else {
-				}
-			}
+			mapData[xx][zz] = yy;
 		}
 	}
 

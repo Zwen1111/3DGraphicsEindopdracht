@@ -126,28 +126,32 @@ void PlayerComponent::update(float elapsedTime, float rotX, float rotY, std::lis
 		jumpValue = jumpValue / gameObject->position.y;
 	}
 
-	//float x, y, z, length;
+	float x, y, z, length;
 
-	//for (size_t i = 1; i < 10; i++)
-	//{
-	//	length = i * 2;
-	//	z = sin((rotY - 90) * PI / 180) * length;
-	//	x = cos((rotY - 90) * PI / 180) * length;
-	//	y = tan((90-rotX) * PI / 180) * length;
+	for (size_t i = 1; i < 18; i++)
+	{
+		length = i;
+		y = cos((90 - rotX) * PI / 180) * length;
+		z = sin((rotY - 90) * PI / 180) * (sin((90-rotX) * PI / 180) * i);
+		x = cos((rotY - 90) * PI / 180) * (sin((90 - rotX) * PI / 180) * i);
 
-	//	cout << " (" << x << "," << y << "," << z << ")" << endl;
+		y -= 0.25f;
+		z -= 0.25f;
+		x -= 0.25f;
 
-	//	for (auto object : objects) {
-	//		if (object->position.x > (int(gameObject->position.x + 1) / 2) + x && object->position.x < (int(gameObject->position.x + 1) / 2) + x + 2 && object->position.z >(int(gameObject->position.z + 1) / 2) + z && object->position.z < (int(gameObject->position.z + 1) / 2) + z + 2) {
-	//			for (auto component : object->getComponents()) {
-	//				if (CubeComponent* m = dynamic_cast<CubeComponent*>(component)) {
+		for (auto object : objects) {
+			if (object->position.x > gameObject->position.x + x && object->position.x < gameObject->position.x + x + 2 &&
+				object->position.y > gameObject->position.y - y - 2 && object->position.y < gameObject->position.y - y &&
+				object->position.z > gameObject->position.z + z && object->position.z < gameObject->position.z + z + 2) {
+				for (auto component : object->getComponents()) {
+					if (CubeComponent* m = dynamic_cast<CubeComponent*>(component)) {
 
-	//					m->drawOutline();
-	//					//cout << "X: " << object->position.x << " Z: " << object->position.z << endl;
-	//					//return;
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
+						m->drawOutline();
+						//cout << "X: " << object->position.x << " Z: " << object->position.z << endl;
+						return;
+					}
+				}
+			}
+		}
+	}
 }
