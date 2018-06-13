@@ -12,9 +12,12 @@ public:
 		jumpValue = 1.1f;
 	}
 
-	PlayerComponent(int mapData[128][128]);
+	PlayerComponent();
 	~PlayerComponent();
 
+	GameObject* selectedBlock;
+
+	void setMapData(int mapData[128][128]);
 	virtual void update(float elapsedTime, float rotX, float rotY, std::list<GameObject*>& objects) override;
 private:
 	int mapData[128][128];

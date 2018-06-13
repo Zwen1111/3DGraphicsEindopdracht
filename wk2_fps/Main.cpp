@@ -33,6 +33,7 @@ int heightmap[128][128][10];
 std::list<GameObject*> objects;
 GameObject* player;
 GameObject* car;
+GameObject* steve;
 
 std::vector<vector<Vertex>> cubes;
 
@@ -274,6 +275,53 @@ void keyboardUp(unsigned char key, int,int)
 	keys[key] = false;
 }
 
+bool leftMouse, rightMouse;
+
+void mouseClick(int button, int state, int x, int y) {
+	switch (button) {
+	case 0:
+		leftMouse = true;
+		break;
+	case 2:
+		rightMouse = true;
+	}
+
+
+	for (auto c : player->getComponents()) {
+		if (PlayerComponent* p = dynamic_cast<PlayerComponent*>(c)) {
+			if (p->selectedBlock == nullptr)
+				return;
+
+			if (button == 0) {
+				objects.remove(p->selectedBlock);
+				mapData[(int(p->selectedBlock->position.x) + 1) / 2][(int(p->selectedBlock->position.z) + 1) / 2] -= 2;
+				p->setMapData(mapData);
+			}
+			else if (button == 2) {
+				GameObject* block = new GameObject();
+				block->addComponent(new CubeComponent(2, cubes[0], textures[0]));
+				block->position = p->selectedBlock->position;
+
+				/*int xx = (int(((float)x * 2) + 1) / 2);
+				int yy = (float)z * 2;
+				int zz = (int(((float)y * 2) + 1) / 2);*/
+
+
+				int xx = int(((float)p->selectedBlock->position.x + 1) / 2);
+				int yy = int(((float)p->selectedBlock->position.z + 1) / 2);
+
+				mapData[xx][yy] += 2;
+				block->position.y = mapData[xx][yy];
+				objects.push_back(block);
+				p->setMapData(mapData);
+			}
+		}
+	}
+
+	leftMouse = false;
+	rightMouse = false;
+}
+
 int main(int argc, char* argv[])
 {
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
@@ -290,6 +338,7 @@ int main(int argc, char* argv[])
 	glutKeyboardFunc(keyboard);
 	glutKeyboardUpFunc(keyboardUp);
 	glutPassiveMotionFunc(mousePassiveMotion);
+	glutMouseFunc(mouseClick);
 
 	glutWarpPointer(width / 2, height / 2);
 
@@ -432,11 +481,19 @@ int main(int argc, char* argv[])
 	stbi_image_free(data);
 
 	GameObject* o = new GameObject();
-	o->addComponent(new PlayerComponent(mapData));
+	PlayerComponent* p = new PlayerComponent();
+	p->setMapData(mapData);
+	o->addComponent(p);
 	o->position = Vec3f(0, 8, 0);
 	objects.push_back(o);
 
 	player = o;
+
+	/*steve = new GameObject();
+	steve->position = Vec3f(5, 4, 5);
+	steve->addComponent(new ModelComponent("models/steve/Steve.obj", o));
+	steve->scale = Vec3f(0.1f, 0.1f, 0.1f);
+	objects.push_back(steve);*/
 
 	car = new GameObject();
 	car->position = Vec3f(20, 4, 20);

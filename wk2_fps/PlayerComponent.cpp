@@ -11,8 +11,15 @@ extern bool keys[256];
 
 using namespace std;
 
-PlayerComponent::PlayerComponent(int mapData[128][128])
+PlayerComponent::PlayerComponent()
 {
+}
+
+PlayerComponent::~PlayerComponent()
+{
+}
+
+void PlayerComponent::setMapData(int mapData[128][128]) {
 	for (size_t x = 0; x < 128; x++)
 	{
 		for (size_t y = 0; y < 128; y++)
@@ -20,10 +27,6 @@ PlayerComponent::PlayerComponent(int mapData[128][128])
 			this->mapData[x][y] = mapData[x][y];
 		}
 	}
-}
-
-PlayerComponent::~PlayerComponent()
-{
 }
 
 void PlayerComponent::update(float elapsedTime, float rotX, float rotY, std::list<GameObject*>& objects)
@@ -146,11 +149,16 @@ void PlayerComponent::update(float elapsedTime, float rotX, float rotY, std::lis
 				for (auto component : object->getComponents()) {
 					if (CubeComponent* m = dynamic_cast<CubeComponent*>(component)) {
 
+						selectedBlock = object;
+
 						m->drawOutline();
 						//cout << "X: " << object->position.x << " Z: " << object->position.z << endl;
 						return;
 					}
 				}
+			}
+			else {
+				selectedBlock = nullptr;
 			}
 		}
 	}
